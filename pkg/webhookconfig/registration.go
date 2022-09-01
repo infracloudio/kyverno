@@ -517,6 +517,7 @@ func (wrc *Register) updateMutatingWebhookConfiguration(targetConfig *admissionr
 		w.ClientConfig.URL = target.ClientConfig.URL
 		w.ClientConfig.Service = target.ClientConfig.Service
 		w.ClientConfig.CABundle = target.ClientConfig.CABundle
+		w.TimeoutSeconds = target.TimeoutSeconds
 		if target.Rules != nil {
 			// If the target webhook has rule definitions override the current.
 			w.Rules = target.Rules
@@ -562,6 +563,7 @@ func (wrc *Register) updateValidatingWebhookConfiguration(targetConfig *admissio
 		w.ClientConfig.URL = target.ClientConfig.URL
 		w.ClientConfig.Service = target.ClientConfig.Service
 		w.ClientConfig.CABundle = target.ClientConfig.CABundle
+		w.TimeoutSeconds = target.TimeoutSeconds
 		if target.Rules != nil {
 			// If the target webhook has rule definitions override the current.
 			w.Rules = target.Rules
