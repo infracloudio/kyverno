@@ -13,12 +13,12 @@ import (
 	sanitizederror "github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/utils/sanitizedError"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/utils/store"
 	"github.com/kyverno/kyverno/pkg/clients/dclient"
+	"github.com/kyverno/kyverno/pkg/config"
 	"github.com/kyverno/kyverno/pkg/openapi"
 	policy2 "github.com/kyverno/kyverno/pkg/policy"
 	"github.com/kyverno/kyverno/pkg/policyreport"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
 	log "sigs.k8s.io/controller-runtime/pkg/log"
 	yaml1 "sigs.k8s.io/yaml"
@@ -112,7 +112,7 @@ func Command() *cobra.Command {
 	var cmd *cobra.Command
 	var resourcePaths []string
 	var cluster, policyReport, stdin, registryAccess bool
-	var mutateLogPath, variablesString, valuesFile, namespace, userInfoPath string
+	var mutateLogPath, variablesString, valuesFile, namespace, userInfoPath, kubeconfig, context string
 	cmd = &cobra.Command{
 		Use:     "apply",
 		Short:   "applies policies on resources",
@@ -127,7 +127,7 @@ func Command() *cobra.Command {
 				}
 			}()
 
-			rc, resources, skipInvalidPolicies, pvInfos, err := applyCommandHelper(resourcePaths, userInfoPath, cluster, policyReport, mutateLogPath, variablesString, valuesFile, namespace, policyPaths, stdin, registryAccess)
+			rc, resources, skipInvalidPolicies, pvInfos, err := applyCommandHelper(resourcePaths, userInfoPath, cluster, policyReport, mutateLogPath, variablesString, valuesFile, namespace, policyPaths, stdin, registryAccess, kubeconfig, context)
 			if err != nil {
 				return err
 			}
@@ -147,15 +147,18 @@ func Command() *cobra.Command {
 	cmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Optional Policy parameter passed with cluster flag")
 	cmd.Flags().BoolVarP(&stdin, "stdin", "i", false, "Optional mutate policy parameter to pipe directly through to kubectl")
 	cmd.Flags().BoolVarP(&registryAccess, "registry", "", false, "If set to true, access the image registry using local docker credentials to populate external data")
+	cmd.Flags().StringVarP(&kubeconfig, "kubeconfig", "", "", "path to kubeconfig file with authorization and master location information")
+	cmd.Flags().StringVarP(&context, "context", "", "", "The name of the kubeconfig context to use")
 	return cmd
 }
 
 func applyCommandHelper(resourcePaths []string, userInfoPath string, cluster bool, policyReport bool, mutateLogPath string,
 	variablesString string, valuesFile string, namespace string, policyPaths []string, stdin bool, registryAccess bool,
+	kubeconfig string, context string,
 ) (rc *common.ResultCounts, resources []*unstructured.Unstructured, skipInvalidPolicies SkippedInvalidPolicies, pvInfos []policyreport.Info, err error) {
 	store.SetMock(true)
 	store.SetRegistryAccess(registryAccess)
-	kubernetesConfig := genericclioptions.NewConfigFlags(true)
+
 	fs := memfs.New()
 
 	if valuesFile != "" && variablesString != "" {
@@ -177,7 +180,7 @@ func applyCommandHelper(resourcePaths []string, userInfoPath string, cluster boo
 
 	var dClient dclient.Interface
 	if cluster {
-		restConfig, err := kubernetesConfig.ToRESTConfig()
+		restConfig, err := config.CreateClientConfigWithContext(kubeconfig, context)
 		if err != nil {
 			return rc, resources, skipInvalidPolicies, pvInfos, err
 		}
