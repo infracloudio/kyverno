@@ -1036,7 +1036,6 @@ func printTestResult(resps map[string]policyreportv1alpha2.PolicyReportResult, t
 	boldYellow := color.New(color.FgYellow).Add(color.Bold)
 	boldFgCyan := color.New(color.FgCyan).Add(color.Bold)
 
-	var countDeprecatedResource int
 	for i, v := range testResults {
 		res := new(Table)
 		res.ID = i + 1
@@ -1049,7 +1048,9 @@ func printTestResult(resps map[string]policyreportv1alpha2.PolicyReportResult, t
 		}
 
 		if v.Resources != nil {
-			for _, resource := range v.Resources {
+			tableCurrentLength := len(table) + 1
+			for resIndex, resource := range v.Resources {
+				res.ID = tableCurrentLength + resIndex
 				if !removeColor {
 					res.Resource = boldFgCyan.Sprintf(v.Namespace) + "/" + boldFgCyan.Sprintf(v.Kind) + "/" + boldFgCyan.Sprintf(resource)
 				} else {
@@ -1137,7 +1138,6 @@ func printTestResult(resps map[string]policyreportv1alpha2.PolicyReportResult, t
 				}
 			}
 		} else if v.Resource != "" {
-			countDeprecatedResource++
 			if !removeColor {
 				res.Resource = boldFgCyan.Sprintf(v.Namespace) + "/" + boldFgCyan.Sprintf(v.Kind) + "/" + boldFgCyan.Sprintf(v.Resource)
 			} else {
