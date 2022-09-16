@@ -2,6 +2,7 @@ package v2beta1
 
 import (
 	"fmt"
+	"strings"
 
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -224,11 +225,40 @@ func (s *Spec) ValidateRules(path *field.Path, namespaced bool, clusterResources
 	return errs
 }
 
+// ValidateNamespaces implements programmatic validation of Namespaces
+// defined under `ValidationFailureActionOverrides`
+func (s *Spec) ValidateNamespaces(path *field.Path) (errs field.ErrorList) {
+	action := map[kyvernov1.ValidationFailureAction]sets.String{
+		kyvernov1.Enforce: sets.NewString(),
+		kyvernov1.Audit:   sets.NewString(),
+	}
+
+	for i, vfa := range s.ValidationFailureActionOverrides {
+		if vfa.Action == kyvernov1.Audit {
+			if action[kyvernov1.Enforce].HasAny(vfa.Namespaces...) {
+				errs = append(errs, field.Invalid(path.Index(i).Child("namespaces"), vfa,
+					fmt.Sprintf("Duplicate namespaces found: %s", strings.Join(action[kyvernov1.Enforce].Intersection(sets.NewString(vfa.Namespaces...)).List(), ", "))))
+			}
+		} else if vfa.Action == kyvernov1.Enforce {
+			if action[kyvernov1.Audit].HasAny(vfa.Namespaces...) {
+				errs = append(errs, field.Invalid(path.Index(i).Child("namespaces"), vfa,
+					fmt.Sprintf("Duplicate namespaces found: %s", strings.Join(action[kyvernov1.Audit].Intersection(sets.NewString(vfa.Namespaces...)).List(), ", "))))
+			}
+		}
+		action[vfa.Action].Insert(vfa.Namespaces...)
+	}
+
+	return errs
+}
+
 // Validate implements programmatic validation
 func (s *Spec) Validate(path *field.Path, namespaced bool, clusterResources sets.String) (errs field.ErrorList) {
 	errs = append(errs, s.ValidateRules(path.Child("rules"), namespaced, clusterResources)...)
 	if namespaced && len(s.ValidationFailureActionOverrides) > 0 {
 		errs = append(errs, field.Forbidden(path.Child("validationFailureActionOverrides"), "Use of validationFailureActionOverrides is supported only with ClusterPolicy"))
+	}
+	if !namespaced {
+		errs = append(errs, s.ValidateNamespaces(path.Child("validationFailureActionOverrides"))...)
 	}
 	return errs
 }
