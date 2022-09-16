@@ -2,6 +2,7 @@ package policycache
 
 import (
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
+	kyvernoutils "github.com/kyverno/kyverno/pkg/utils"
 )
 
 // Cache get method use for to get policy names and mostly use to test cache testcases
@@ -42,5 +43,55 @@ func (c *cache) GetPolicies(pkey PolicyType, kind, nspace string) []kyvernov1.Po
 		result = append(result, c.store.get(pkey, kind, nspace)...)
 		result = append(result, c.store.get(pkey, "*", nspace)...)
 	}
+
+	if pkey == ValidateAudit { // also get policies with ValidateEnforce
+		result = append(result, c.store.get(ValidateEnforce, kind, "")...)
+		result = append(result, c.store.get(ValidateEnforce, "*", "")...)
+	}
+
+	if pkey == ValidateAudit || pkey == ValidateEnforce {
+		result = filterPolicies(pkey, result, nspace, kind)
+	}
+
 	return result
+}
+
+// filter for cluster policies on validationFailureAction is overriden
+func filterPolicies(pkey PolicyType, result []kyvernov1.PolicyInterface, nspace, kind string) []kyvernov1.PolicyInterface {
+	var policies []kyvernov1.PolicyInterface
+	for _, policy := range result {
+		validationFailureAction := policy.GetSpec().ValidationFailureAction
+		keepPolicy := true
+		overrides := policy.GetSpec().ValidationFailureActionOverrides
+
+		if pkey == ValidateAudit {
+			if validationFailureAction == kyvernov1.Enforce && (len(overrides) == 0 || nspace == "") {
+				keepPolicy = false
+			} else {
+				for _, action := range overrides {
+					if action.Action == kyvernov1.Enforce && kyvernoutils.ContainsNamepace(action.Namespaces, nspace) {
+						keepPolicy = false
+						break
+					}
+				}
+			}
+
+		} else if pkey == ValidateEnforce {
+			if validationFailureAction == kyvernov1.Audit && nspace == "" {
+				keepPolicy = false
+			} else {
+				for _, action := range overrides {
+					if action.Action == kyvernov1.Audit && kyvernoutils.ContainsNamepace(action.Namespaces, nspace) {
+						keepPolicy = false
+						break
+					}
+				}
+			}
+		}
+
+		if keepPolicy { // remove policy from slice
+			policies = append(policies, policy)
+		}
+	}
+	return policies
 }
