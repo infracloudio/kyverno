@@ -2356,6 +2356,9 @@ spec:
                                         keys:
                                           description: Keys specifies one or more public keys
                                           properties:
+                                            kms:
+                                              description: KMS provides configuration to get key stored in public clouds
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                               type: string
@@ -2367,6 +2370,19 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -2627,6 +2643,9 @@ spec:
                                       keys:
                                         description: Keys specifies one or more public keys
                                         properties:
+                                          kms:
+                                            description: KMS provides configuration to get key stored in public clouds
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                             type: string
@@ -2638,6 +2657,19 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -4045,6 +4077,9 @@ spec:
                                             keys:
                                               description: Keys specifies one or more public keys
                                               properties:
+                                                kms:
+                                                  description: KMS provides configuration to get key stored in public clouds
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                   type: string
@@ -4056,6 +4091,19 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -4316,6 +4364,9 @@ spec:
                                           keys:
                                             description: Keys specifies one or more public keys
                                             properties:
+                                              kms:
+                                                description: KMS provides configuration to get key stored in public clouds
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                 type: string
@@ -4327,6 +4378,19 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:
@@ -5686,6 +5750,9 @@ spec:
                                         keys:
                                           description: Keys specifies one or more public keys
                                           properties:
+                                            kms:
+                                              description: KMS provides configuration to get key stored in public clouds
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                               type: string
@@ -5697,6 +5764,19 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -5947,6 +6027,9 @@ spec:
                                       keys:
                                         description: Keys specifies one or more public keys
                                         properties:
+                                          kms:
+                                            description: KMS provides configuration to get key stored in public clouds
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                             type: string
@@ -5958,6 +6041,19 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -7350,6 +7446,9 @@ spec:
                                             keys:
                                               description: Keys specifies one or more public keys
                                               properties:
+                                                kms:
+                                                  description: KMS provides configuration to get key stored in public clouds
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                   type: string
@@ -7361,6 +7460,19 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -7621,6 +7733,9 @@ spec:
                                           keys:
                                             description: Keys specifies one or more public keys
                                             properties:
+                                              kms:
+                                                description: KMS provides configuration to get key stored in public clouds
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                 type: string
@@ -7632,6 +7747,19 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:
@@ -9587,6 +9715,9 @@ spec:
                                         keys:
                                           description: Keys specifies one or more public keys
                                           properties:
+                                            kms:
+                                              description: KMS provides configuration to get key stored in public clouds
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                               type: string
@@ -9598,6 +9729,19 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -9858,6 +10002,9 @@ spec:
                                       keys:
                                         description: Keys specifies one or more public keys
                                         properties:
+                                          kms:
+                                            description: KMS provides configuration to get key stored in public clouds
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                             type: string
@@ -9869,6 +10016,19 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -11276,6 +11436,9 @@ spec:
                                             keys:
                                               description: Keys specifies one or more public keys
                                               properties:
+                                                kms:
+                                                  description: KMS provides configuration to get key stored in public clouds
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                   type: string
@@ -11287,6 +11450,19 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -11547,6 +11723,9 @@ spec:
                                           keys:
                                             description: Keys specifies one or more public keys
                                             properties:
+                                              kms:
+                                                description: KMS provides configuration to get key stored in public clouds
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                 type: string
@@ -11558,6 +11737,19 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:
@@ -12917,6 +13109,9 @@ spec:
                                         keys:
                                           description: Keys specifies one or more public keys
                                           properties:
+                                            kms:
+                                              description: KMS provides configuration to get key stored in public clouds
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                               type: string
@@ -12928,6 +13123,19 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -13178,6 +13386,9 @@ spec:
                                       keys:
                                         description: Keys specifies one or more public keys
                                         properties:
+                                          kms:
+                                            description: KMS provides configuration to get key stored in public clouds
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                             type: string
@@ -13189,6 +13400,19 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -14581,6 +14805,9 @@ spec:
                                             keys:
                                               description: Keys specifies one or more public keys
                                               properties:
+                                                kms:
+                                                  description: KMS provides configuration to get key stored in public clouds
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                   type: string
@@ -14592,6 +14819,19 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -14852,6 +15092,9 @@ spec:
                                           keys:
                                             description: Keys specifies one or more public keys
                                             properties:
+                                              kms:
+                                                description: KMS provides configuration to get key stored in public clouds
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509 public keys used to verify image signatures. The keys can be directly specified or can be a variable reference to a key specified in a ConfigMap (see https://kyverno.io/docs/writing-policies/variables/). When multiple keys are specified each key is processed as a separate staticKey entry (.attestors[*].entries.keys) within the set of attestors and the count is applied across the keys.
                                                 type: string
@@ -14863,6 +15106,19 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Secret provides configuration to provide name and namespace of kubernetes secret. Public key mentioned in the secret is used to verify image signatures
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:

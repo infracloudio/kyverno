@@ -2213,6 +2213,10 @@ spec:
                                           description: Keys specifies one or more
                                             public keys
                                           properties:
+                                            kms:
+                                              description: KMS provides configuration
+                                                to get key stored in public clouds
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509
                                                 public keys used to verify image signatures.
@@ -2241,6 +2245,23 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Secret provides configuration
+                                                to provide name and namespace of kubernetes
+                                                secret. Public key mentioned in the
+                                                secret is used to verify image signatures
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which
+                                                    secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -2632,6 +2653,10 @@ spec:
                                         description: Keys specifies one or more public
                                           keys
                                         properties:
+                                          kms:
+                                            description: KMS provides configuration
+                                              to get key stored in public clouds
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public
                                               keys used to verify image signatures.
@@ -2659,6 +2684,23 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Secret provides configuration
+                                              to provide name and namespace of kubernetes
+                                              secret. Public key mentioned in the
+                                              secret is used to verify image signatures
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which
+                                                  secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -4997,6 +5039,10 @@ spec:
                                               description: Keys specifies one or more
                                                 public keys
                                               properties:
+                                                kms:
+                                                  description: KMS provides configuration
+                                                    to get key stored in public clouds
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509
                                                     public keys used to verify image
@@ -5027,6 +5073,24 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Secret provides configuration
+                                                    to provide name and namespace
+                                                    of kubernetes secret. Public key
+                                                    mentioned in the secret is used
+                                                    to verify image signatures
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name
+                                                        in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -5427,6 +5491,10 @@ spec:
                                             description: Keys specifies one or more
                                               public keys
                                             properties:
+                                              kms:
+                                                description: KMS provides configuration
+                                                  to get key stored in public clouds
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509
                                                   public keys used to verify image
@@ -5456,6 +5524,24 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Secret provides configuration
+                                                  to provide name and namespace of
+                                                  kubernetes secret. Public key mentioned
+                                                  in the secret is used to verify
+                                                  image signatures
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in
+                                                      which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:
@@ -7588,6 +7674,10 @@ spec:
                                           description: Keys specifies one or more
                                             public keys
                                           properties:
+                                            kms:
+                                              description: KMS provides configuration
+                                                to get key stored in public clouds
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509
                                                 public keys used to verify image signatures.
@@ -7616,6 +7706,23 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Secret provides configuration
+                                                to provide name and namespace of kubernetes
+                                                secret. Public key mentioned in the
+                                                secret is used to verify image signatures
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which
+                                                    secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -7992,6 +8099,10 @@ spec:
                                         description: Keys specifies one or more public
                                           keys
                                         properties:
+                                          kms:
+                                            description: KMS provides configuration
+                                              to get key stored in public clouds
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public
                                               keys used to verify image signatures.
@@ -8019,6 +8130,23 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Secret provides configuration
+                                              to provide name and namespace of kubernetes
+                                              secret. Public key mentioned in the
+                                              secret is used to verify image signatures
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which
+                                                  secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -10332,6 +10460,10 @@ spec:
                                               description: Keys specifies one or more
                                                 public keys
                                               properties:
+                                                kms:
+                                                  description: KMS provides configuration
+                                                    to get key stored in public clouds
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509
                                                     public keys used to verify image
@@ -10362,6 +10494,24 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Secret provides configuration
+                                                    to provide name and namespace
+                                                    of kubernetes secret. Public key
+                                                    mentioned in the secret is used
+                                                    to verify image signatures
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name
+                                                        in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -10762,6 +10912,10 @@ spec:
                                             description: Keys specifies one or more
                                               public keys
                                             properties:
+                                              kms:
+                                                description: KMS provides configuration
+                                                  to get key stored in public clouds
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509
                                                   public keys used to verify image
@@ -10791,6 +10945,24 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Secret provides configuration
+                                                  to provide name and namespace of
+                                                  kubernetes secret. Public key mentioned
+                                                  in the secret is used to verify
+                                                  image signatures
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in
+                                                      which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:

@@ -310,7 +310,7 @@ func (iv *imageVerifier) verifyAttestorSet(attestorSet kyvernov1.AttestorSet, im
 ) (*cosign.Response, error) {
 	var errorList []error
 	verifiedCount := 0
-	attestorSet = expandStaticKeys(attestorSet)
+	attestorSet = expandKeysData(attestorSet)
 	requiredCount := getRequiredCount(attestorSet)
 	image := imageInfo.String()
 
@@ -353,6 +353,43 @@ func (iv *imageVerifier) verifyAttestorSet(attestorSet kyvernov1.AttestorSet, im
 	iv.logger.Info("image verification failed", "verifiedCount", verifiedCount, "requiredCount", requiredCount, "errors", errorList)
 	err := multierr.Combine(errorList...)
 	return nil, err
+}
+
+func expandKeysData(attestorSet kyvernov1.AttestorSet) kyvernov1.AttestorSet {
+	attestorSet = expandStaticKeys(attestorSet)
+	attestorSet = expandSecretData(attestorSet)
+	attestorSet = expandKmsData(attestorSet)
+	return attestorSet
+}
+
+func expandSecretData(attestorSet kyvernov1.AttestorSet) kyvernov1.AttestorSet {
+	var entries []kyvernov1.Attestor
+	if len(attestorSet.Entries) > 0 {
+		entries = attestorSet.Entries
+	}
+	for _, e := range attestorSet.Entries {
+		if e.Keys != nil && e.Keys.Secret != nil {
+			secretData := &kyvernov1.SecretReference{
+				Name: e.Keys.Secret.Name, Namespace: e.Keys.Secret.Namespace}
+			a := kyvernov1.Attestor{Keys: &kyvernov1.StaticKeyAttestor{Secret: secretData}}
+			entries = append(entries, a)
+		}
+	}
+	return kyvernov1.AttestorSet{Count: attestorSet.Count, Entries: entries}
+}
+
+func expandKmsData(attestorSet kyvernov1.AttestorSet) kyvernov1.AttestorSet {
+	var entries []kyvernov1.Attestor
+	if len(attestorSet.Entries) > 0 {
+		entries = attestorSet.Entries
+	}
+	for _, e := range attestorSet.Entries {
+		if e.Keys != nil && e.Keys.KMS != "" {
+			a := kyvernov1.Attestor{Keys: &kyvernov1.StaticKeyAttestor{KMS: e.Keys.KMS}}
+			entries = append(entries, a)
+		}
+	}
+	return kyvernov1.AttestorSet{Count: attestorSet.Count, Entries: entries}
 }
 
 func expandStaticKeys(attestorSet kyvernov1.AttestorSet) kyvernov1.AttestorSet {
@@ -425,7 +462,14 @@ func (iv *imageVerifier) buildOptionsAndPath(attestor kyvernov1.Attestor, imageV
 
 	if attestor.Keys != nil {
 		path = path + ".keys"
-		opts.Key = attestor.Keys.PublicKeys
+		if attestor.Keys.PublicKeys != "" {
+			opts.Key = attestor.Keys.PublicKeys
+		} else if attestor.Keys.Secret != nil {
+			opts.Key = fmt.Sprintf("k8s://%s/%s", attestor.Keys.Secret.Namespace,
+				attestor.Keys.Secret.Name)
+		} else if attestor.Keys.KMS != "" {
+			opts.Key = attestor.Keys.KMS
+		}
 		if attestor.Keys.Rekor != nil {
 			opts.RekorURL = attestor.Keys.Rekor.URL
 		}
