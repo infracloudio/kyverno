@@ -132,11 +132,26 @@ type StaticKeyAttestor struct {
 	// attestors and the count is applied across the keys.
 	PublicKeys string `json:"publicKeys,omitempty" yaml:"publicKeys,omitempty"`
 
+	// KMS provides the URI to the public key stored in a Key Management System. See:
+	// https://github.com/sigstore/cosign/blob/main/KMS.md
+	KMS string `json:"kms,omitempty" yaml:"kms,omitempty"`
+
+	// Reference to a Secret resource that contains a public key
+	Secret *SecretReference `json:"secret,omitempty" yaml:"secret,omitempty"`
+
 	// Rekor provides configuration for the Rekor transparency log service. If the value is nil,
 	// Rekor is not checked. If an empty object is provided the public instance of
 	// Rekor (https://rekor.sigstore.dev) is used.
 	// +kubebuilder:validation:Optional
 	Rekor *CTLog `json:"rekor,omitempty" yaml:"rekor,omitempty"`
+}
+
+type SecretReference struct {
+	// name of the secret
+	Name string `json:"name" yaml:"name"`
+
+	// namespace name in which secret is created
+	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
 type CertificateAttestor struct {

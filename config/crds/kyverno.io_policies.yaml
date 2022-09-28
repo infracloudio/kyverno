@@ -2263,6 +2263,11 @@ spec:
                                           description: Keys specifies one or more
                                             public keys
                                           properties:
+                                            kms:
+                                              description: 'KMS provides the URI to
+                                                the public key stored in a Key Management
+                                                System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509
                                                 public keys used to verify image signatures.
@@ -2291,6 +2296,21 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Reference to a Secret resource
+                                                that contains a public key
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which
+                                                    secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -2699,6 +2719,11 @@ spec:
                                         description: Keys specifies one or more public
                                           keys
                                         properties:
+                                          kms:
+                                            description: 'KMS provides the URI to
+                                              the public key stored in a Key Management
+                                              System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public
                                               keys used to verify image signatures.
@@ -2726,6 +2751,21 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Reference to a Secret resource
+                                              that contains a public key
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which
+                                                  secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -5119,6 +5159,11 @@ spec:
                                               description: Keys specifies one or more
                                                 public keys
                                               properties:
+                                                kms:
+                                                  description: 'KMS provides the URI
+                                                    to the public key stored in a
+                                                    Key Management System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509
                                                     public keys used to verify image
@@ -5149,6 +5194,22 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Reference to a Secret
+                                                    resource that contains a public
+                                                    key
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name
+                                                        in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -5567,6 +5628,11 @@ spec:
                                             description: Keys specifies one or more
                                               public keys
                                             properties:
+                                              kms:
+                                                description: 'KMS provides the URI
+                                                  to the public key stored in a Key
+                                                  Management System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509
                                                   public keys used to verify image
@@ -5596,6 +5662,22 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Reference to a Secret
+                                                  resource that contains a public
+                                                  key
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in
+                                                      which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:
@@ -7778,6 +7860,11 @@ spec:
                                           description: Keys specifies one or more
                                             public keys
                                           properties:
+                                            kms:
+                                              description: 'KMS provides the URI to
+                                                the public key stored in a Key Management
+                                                System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                              type: string
                                             publicKeys:
                                               description: Keys is a set of X.509
                                                 public keys used to verify image signatures.
@@ -7806,6 +7893,21 @@ spec:
                                                   type: string
                                               required:
                                               - url
+                                              type: object
+                                            secret:
+                                              description: Reference to a Secret resource
+                                                that contains a public key
+                                              properties:
+                                                name:
+                                                  description: name of the secret
+                                                  type: string
+                                                namespace:
+                                                  description: namespace name in which
+                                                    secret is created
+                                                  type: string
+                                              required:
+                                              - name
+                                              - namespace
                                               type: object
                                           type: object
                                         repository:
@@ -8199,6 +8301,11 @@ spec:
                                         description: Keys specifies one or more public
                                           keys
                                         properties:
+                                          kms:
+                                            description: 'KMS provides the URI to
+                                              the public key stored in a Key Management
+                                              System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                            type: string
                                           publicKeys:
                                             description: Keys is a set of X.509 public
                                               keys used to verify image signatures.
@@ -8226,6 +8333,21 @@ spec:
                                                 type: string
                                             required:
                                             - url
+                                            type: object
+                                          secret:
+                                            description: Reference to a Secret resource
+                                              that contains a public key
+                                            properties:
+                                              name:
+                                                description: name of the secret
+                                                type: string
+                                              namespace:
+                                                description: namespace name in which
+                                                  secret is created
+                                                type: string
+                                            required:
+                                            - name
+                                            - namespace
                                             type: object
                                         type: object
                                       repository:
@@ -10593,6 +10715,11 @@ spec:
                                               description: Keys specifies one or more
                                                 public keys
                                               properties:
+                                                kms:
+                                                  description: 'KMS provides the URI
+                                                    to the public key stored in a
+                                                    Key Management System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                                  type: string
                                                 publicKeys:
                                                   description: Keys is a set of X.509
                                                     public keys used to verify image
@@ -10623,6 +10750,22 @@ spec:
                                                       type: string
                                                   required:
                                                   - url
+                                                  type: object
+                                                secret:
+                                                  description: Reference to a Secret
+                                                    resource that contains a public
+                                                    key
+                                                  properties:
+                                                    name:
+                                                      description: name of the secret
+                                                      type: string
+                                                    namespace:
+                                                      description: namespace name
+                                                        in which secret is created
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  - namespace
                                                   type: object
                                               type: object
                                             repository:
@@ -11041,6 +11184,11 @@ spec:
                                             description: Keys specifies one or more
                                               public keys
                                             properties:
+                                              kms:
+                                                description: 'KMS provides the URI
+                                                  to the public key stored in a Key
+                                                  Management System. See: https://github.com/sigstore/cosign/blob/main/KMS.md'
+                                                type: string
                                               publicKeys:
                                                 description: Keys is a set of X.509
                                                   public keys used to verify image
@@ -11070,6 +11218,22 @@ spec:
                                                     type: string
                                                 required:
                                                 - url
+                                                type: object
+                                              secret:
+                                                description: Reference to a Secret
+                                                  resource that contains a public
+                                                  key
+                                                properties:
+                                                  name:
+                                                    description: name of the secret
+                                                    type: string
+                                                  namespace:
+                                                    description: namespace name in
+                                                      which secret is created
+                                                    type: string
+                                                required:
+                                                - name
+                                                - namespace
                                                 type: object
                                             type: object
                                           repository:
