@@ -2061,3 +2061,62 @@ func Test_ValidateNamespace(t *testing.T) {
 		})
 	}
 }
+
+func Test_Validate_BackgroundOnlyMode_Policy(t *testing.T) {
+	invalidBackgroundModePolicy := `{
+		"apiVersion": "kyverno.io/v1",
+		"kind": "ClusterPolicy",
+		"metadata": {
+		   "name": "check-label-app"
+		},
+		"spec": {
+		   "background": false,
+		   "validationFailureAction": "",
+		   "rules": [
+			  {
+				 "name": "check-label-app",
+				 "match": {
+					"resources": {
+					   "kinds": [
+						  "Pod"
+					   ]
+					}
+				 },
+				 "validate": {
+					"message": "The label 'app' is required.",
+					"pattern": {
+						"metadata": {
+							"labels": {
+								"app": "?*"
+							}
+						}
+					}
+				}
+			  }
+		   ]
+		}
+	 }
+	`
+	var inValidPolicy *kyverno.ClusterPolicy
+	err := json.Unmarshal([]byte(invalidBackgroundModePolicy), &inValidPolicy)
+	assert.NilError(t, err)
+	openApiManager, _ := openapi.NewManager()
+	// vlidate invalid policy
+	_, err = Validate(inValidPolicy, nil, true, openApiManager)
+	assert.Error(t, err, "Invalid policy. When background is false ValidationFailureAction must be set to either audit or enforce")
+	validPolicy := inValidPolicy.DeepCopy()
+	// validate background-only mode policy
+	background := true
+	validPolicy.Spec.Background = &background
+	_, err = Validate(validPolicy, nil, true, openApiManager)
+	assert.NilError(t, err)
+	// validate background mode policy
+	validPolicy.Spec.ValidationFailureAction = kyverno.Audit
+	_, err = Validate(validPolicy, nil, true, openApiManager)
+	assert.NilError(t, err)
+	// validate non background mode policy
+	background = false
+	validPolicy.Spec.Background = &background
+	_, err = Validate(validPolicy, nil, true, openApiManager)
+	assert.NilError(t, err)
+}

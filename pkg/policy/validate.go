@@ -109,12 +109,31 @@ func validateJSONPatch(patch string, ruleIdx int) error {
 	return nil
 }
 
+func validateBackgroundOnlyMode(policy kyvernov1.PolicyInterface) error {
+	validate := policy.GetSpec().ValidationFailureAction
+	background := policy.GetSpec().BackgroundProcessingEnabled()
+	if !background {
+		for _, rule := range policy.GetSpec().Rules {
+			if validate == "" && (rule.HasValidate() || rule.HasVerifyImages()) {
+				return fmt.Errorf("%s", "Invalid policy. When background is false ValidationFailureAction must be set to either audit or enforce")
+			}
+		}
+	}
+	return nil
+}
+
 // Validate checks the policy and rules declarations for required configurations
 func Validate(policy kyvernov1.PolicyInterface, client dclient.Interface, mock bool, openApiManager openapi.Manager) (*admissionv1.AdmissionResponse, error) {
 	namespaced := policy.IsNamespaced()
 	spec := policy.GetSpec()
 	background := spec.BackgroundProcessingEnabled()
 	onPolicyUpdate := spec.GetMutateExistingOnPolicyUpdate()
+
+	err := validateBackgroundOnlyMode(policy)
+	if err != nil {
+		return nil, err
+	}
+
 	if !mock {
 		openapicontroller.NewController(client, openApiManager).CheckSync(context.TODO())
 	}
@@ -122,7 +141,7 @@ func Validate(policy kyvernov1.PolicyInterface, client dclient.Interface, mock b
 	var errs field.ErrorList
 	specPath := field.NewPath("spec")
 
-	err := ValidateVariables(policy, background)
+	err = ValidateVariables(policy, background)
 	if err != nil {
 		return nil, err
 	}

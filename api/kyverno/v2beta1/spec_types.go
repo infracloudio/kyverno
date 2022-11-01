@@ -30,10 +30,10 @@ type Spec struct {
 	// ValidationFailureAction defines if a validation policy rule violation should block
 	// the admission review request (enforce), or allow (audit) the admission review request
 	// and report an error in a policy report. Optional.
-	// Allowed values are audit or enforce. The default value is "audit".
+	// Allowed values are audit or enforce.
+	// The default value is "" which means policy will be executed in background-only mode.
 	// +optional
-	// +kubebuilder:validation:Enum=audit;enforce
-	// +kubebuilder:default=audit
+	// +kubebuilder:validation:Enum=audit;enforce;""
 	ValidationFailureAction kyvernov1.ValidationFailureAction `json:"validationFailureAction,omitempty" yaml:"validationFailureAction,omitempty"`
 
 	// ValidationFailureActionOverrides is a Cluster Policy attribute that specifies ValidationFailureAction

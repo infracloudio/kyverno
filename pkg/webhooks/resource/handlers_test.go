@@ -419,3 +419,56 @@ func makeKey(policy kyverno.PolicyInterface) string {
 
 	return namespace + "/" + name
 }
+
+func Test_Filter_BackgroundOnly_Policies(t *testing.T) {
+	tests := []struct {
+		policy                       kyverno.ClusterPolicy
+		result                       int
+		filterBackgroundOnlyPolicies bool
+		background                   bool
+		ValidationFailureAction      kyverno.ValidationFailureAction
+	}{
+		{ // background only mode + do filter
+			ValidationFailureAction:      "",
+			filterBackgroundOnlyPolicies: true,
+			background:                   true,
+			result:                       0,
+		},
+		{ // background only mode + no filter
+			ValidationFailureAction:      "",
+			filterBackgroundOnlyPolicies: false,
+			background:                   true,
+			result:                       1,
+		},
+		{ // background mode + Audit mode + do filter
+			ValidationFailureAction:      kyverno.Audit,
+			filterBackgroundOnlyPolicies: true,
+			background:                   true,
+			result:                       1,
+		},
+		{ // background mode + Audit  mode + no filter
+			ValidationFailureAction:      kyverno.Audit,
+			result:                       1,
+			filterBackgroundOnlyPolicies: false,
+			background:                   true,
+		},
+		{ // no background mode + Audit mode + do filter
+			ValidationFailureAction:      kyverno.Audit,
+			result:                       1,
+			filterBackgroundOnlyPolicies: true,
+			background:                   false,
+		},
+		{ // no background mode + Audit mode + no filter
+			ValidationFailureAction:      kyverno.Audit,
+			result:                       1,
+			filterBackgroundOnlyPolicies: false,
+			background:                   false,
+		},
+	}
+	for _, test := range tests {
+		test.policy.Spec.ValidationFailureAction = test.ValidationFailureAction
+		test.policy.Spec.Background = &test.background
+		result := filterPolicies("", test.filterBackgroundOnlyPolicies, &test.policy)
+		assert.Equal(t, len(result), test.result)
+	}
+}
