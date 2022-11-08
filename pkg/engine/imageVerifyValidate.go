@@ -19,6 +19,13 @@ func processImageValidationRule(log logr.Logger, ctx *PolicyContext, rule *kyver
 	}
 
 	log = log.WithValues("rule", rule.Name)
+	runValidation, err := requiredValidation(ctx, rule)
+	if err != nil {
+		log.Error(err, fmt.Sprintf("failed to load image info: %s", err.Error()))
+	}
+	if !runValidation {
+		return ruleResponse(*rule, response.Validation, "image verified", response.RuleStatusPass, nil)
+	}
 	if err := LoadContext(log, rule.Context, ctx, rule.Name); err != nil {
 		if _, ok := err.(gojmespath.NotFoundError); ok {
 			log.V(3).Info("failed to load context", "reason", err.Error())

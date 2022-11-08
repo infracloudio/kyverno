@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -18,12 +19,53 @@ import (
 	"github.com/kyverno/kyverno/pkg/engine/variables"
 	"github.com/kyverno/kyverno/pkg/logging"
 	"github.com/kyverno/kyverno/pkg/registryclient"
+	"github.com/kyverno/kyverno/pkg/utils/api"
 	apiutils "github.com/kyverno/kyverno/pkg/utils/api"
 	"github.com/kyverno/kyverno/pkg/utils/wildcard"
 	"github.com/pkg/errors"
 	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
+
+func requiredValidation(policyContext *PolicyContext, rule *kyvernov1.Rule) (bool, error) {
+	imageInfo := &api.ImageInfo{}
+	var runVerification = true
+	images := policyContext.JSONContext.ImageInfo()
+	imageData, err := json.Marshal(images["containers"]["test"])
+	if err != nil {
+		return false, err
+	}
+	err = json.Unmarshal(imageData, &imageInfo)
+	if err != nil {
+		return false, err
+	}
+	// if registry is empty, it means policy rule has only "*" in image reference
+	// hence allow running verification
+	if imageInfo.Registry == "" {
+		return runVerification, nil
+	}
+	imageName := fmt.Sprintf("%s/%s:%s", imageInfo.Registry, imageInfo.Name, imageInfo.Tag)
+	for _, verifyImage := range rule.VerifyImages {
+		runVerification = true
+		if len(verifyImage.ImageReferences) > 0 {
+			for _, imageRef := range verifyImage.ImageReferences {
+				regex := regexp.MustCompile(imageRef)
+				groups := regex.FindAllStringSubmatch(imageName, -1)
+				if len(groups) == 0 {
+					runVerification = false
+				}
+			}
+		}
+		if verifyImage.Image != "" {
+			regex := regexp.MustCompile(verifyImage.Image)
+			groups := regex.FindAllStringSubmatch(imageName, -1)
+			if len(groups) == 0 {
+				runVerification = false
+			}
+		}
+	}
+	return runVerification, nil
+}
 
 func VerifyAndPatchImages(policyContext *PolicyContext) (*response.EngineResponse, *ImageVerificationMetadata) {
 	resp := &response.EngineResponse{}
@@ -66,6 +108,17 @@ func VerifyAndPatchImages(policyContext *PolicyContext) (*response.EngineRespons
 
 		logger.V(3).Info("processing image verification rule", "ruleSelector", applyRules)
 
+		var err error
+		runVerification, err := requiredValidation(policyContext, rule)
+		if err != nil {
+			appendError(resp, rule, fmt.Sprintf("failed to load image info: %s", err.Error()), response.RuleStatusError)
+			continue
+		}
+		if !runVerification {
+			logger.V(3).Info("skipping image verification rule", "ruleSelector", applyRules)
+			continue
+		}
+
 		policyContext.JSONContext.Restore()
 		if err := LoadContext(logger, rule.Context, policyContext, rule.Name); err != nil {
 			appendError(resp, rule, fmt.Sprintf("failed to load context: %s", err.Error()), response.RuleStatusError)
@@ -73,7 +126,6 @@ func VerifyAndPatchImages(policyContext *PolicyContext) (*response.EngineRespons
 		}
 
 		ruleImages := images
-		var err error
 		if rule.ImageExtractors != nil {
 			if ruleImages, err = policyContext.JSONContext.GenerateCustomImageInfo(&policyContext.NewResource, rule.ImageExtractors); err != nil {
 				appendError(resp, rule, fmt.Sprintf("failed to extract images: %s", err.Error()), response.RuleStatusError)
