@@ -126,6 +126,11 @@ func (p *Policy) CreateDeepCopy() PolicyInterface {
 	return p.DeepCopy()
 }
 
+// BackgroundProcessingEnabled checks if policy is background-only mode
+func (p *Policy) IsBackGroundOnlyPolicy() bool {
+	return p.Spec.BackgroundProcessingEnabled() && p.Spec.ValidationFailureAction == ""
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // PolicyList is a list of Policy instances.

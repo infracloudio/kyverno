@@ -30,10 +30,10 @@ type Spec struct {
 	// ValidationFailureAction defines if a validation policy rule violation should block
 	// the admission review request (enforce), or allow (audit) the admission review request
 	// and report an error in a policy report. Optional.
-	// Allowed values are audit or enforce. The default value is "audit".
+	// Allowed values are "", Audit or Enforce.
+	// The default value is "" which means policy will be executed in background-only mode if background is set to true.
 	// +optional
-	// +kubebuilder:validation:Enum=audit;enforce;Audit;Enforce
-	// +kubebuilder:default=audit
+	// +kubebuilder:validation:Enum=audit;enforce;Audit;Enforce;""
 	ValidationFailureAction kyvernov1.ValidationFailureAction `json:"validationFailureAction,omitempty" yaml:"validationFailureAction,omitempty"`
 
 	// ValidationFailureActionOverrides is a Cluster Policy attribute that specifies ValidationFailureAction
@@ -224,4 +224,9 @@ func (s *Spec) Validate(path *field.Path, namespaced bool, clusterResources sets
 		errs = append(errs, field.Forbidden(path.Child("validationFailureActionOverrides"), "Use of validationFailureActionOverrides is supported only with ClusterPolicy"))
 	}
 	return errs
+}
+
+// BackgroundProcessingEnabled checks if policy is background-only mode
+func (p *Spec) IsBackGroundOnlyPolicy() bool {
+	return p.BackgroundProcessingEnabled() && p.ValidationFailureAction == ""
 }

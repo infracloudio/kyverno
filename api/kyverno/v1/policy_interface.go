@@ -20,4 +20,5 @@ type PolicyInterface interface {
 	CreateDeepCopy() PolicyInterface
 	IsReady() bool
 	ValidateSchema() bool
+	IsBackGroundOnlyPolicy() bool
 }

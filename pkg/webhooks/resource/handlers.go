@@ -100,10 +100,10 @@ func (h *handlers) Validate(ctx context.Context, logger logr.Logger, request *ad
 	logger.V(4).Info("received an admission request in validating webhook")
 
 	// timestamp at which this admission request got triggered
-	policies := filterPolicies(failurePolicy, h.pCache.GetPolicies(policycache.ValidateEnforce, kind, request.Namespace)...)
-	mutatePolicies := filterPolicies(failurePolicy, h.pCache.GetPolicies(policycache.Mutate, kind, request.Namespace)...)
-	generatePolicies := filterPolicies(failurePolicy, h.pCache.GetPolicies(policycache.Generate, kind, request.Namespace)...)
-	imageVerifyValidatePolicies := filterPolicies(failurePolicy, h.pCache.GetPolicies(policycache.VerifyImagesValidate, kind, request.Namespace)...)
+	policies := filterPolicies(failurePolicy, true, h.pCache.GetPolicies(policycache.ValidateEnforce, kind, request.Namespace)...)
+	mutatePolicies := filterPolicies(failurePolicy, false, h.pCache.GetPolicies(policycache.Mutate, kind, request.Namespace)...)
+	generatePolicies := filterPolicies(failurePolicy, false, h.pCache.GetPolicies(policycache.Generate, kind, request.Namespace)...)
+	imageVerifyValidatePolicies := filterPolicies(failurePolicy, true, h.pCache.GetPolicies(policycache.VerifyImagesValidate, kind, request.Namespace)...)
 	policies = append(policies, imageVerifyValidatePolicies...)
 
 	if len(policies) == 0 && len(mutatePolicies) == 0 && len(generatePolicies) == 0 {
@@ -145,8 +145,8 @@ func (h *handlers) Mutate(ctx context.Context, logger logr.Logger, request *admi
 	kind := request.Kind.Kind
 	logger = logger.WithValues("kind", kind)
 	logger.V(4).Info("received an admission request in mutating webhook")
-	mutatePolicies := filterPolicies(failurePolicy, h.pCache.GetPolicies(policycache.Mutate, kind, request.Namespace)...)
-	verifyImagesPolicies := filterPolicies(failurePolicy, h.pCache.GetPolicies(policycache.VerifyImagesMutate, kind, request.Namespace)...)
+	mutatePolicies := filterPolicies(failurePolicy, false, h.pCache.GetPolicies(policycache.Mutate, kind, request.Namespace)...)
+	verifyImagesPolicies := filterPolicies(failurePolicy, true, h.pCache.GetPolicies(policycache.VerifyImagesMutate, kind, request.Namespace)...)
 	if len(mutatePolicies) == 0 && len(verifyImagesPolicies) == 0 {
 		logger.V(4).Info("no policies matched mutate admission request")
 		return admissionutils.ResponseSuccess()
@@ -211,9 +211,13 @@ func (h *handlers) handleDelete(logger logr.Logger, request *admissionv1.Admissi
 	}
 }
 
-func filterPolicies(failurePolicy string, policies ...kyvernov1.PolicyInterface) []kyvernov1.PolicyInterface {
+func filterPolicies(failurePolicy string, filterBackgroundOnlyPolicies bool, policies ...kyvernov1.PolicyInterface) []kyvernov1.PolicyInterface {
 	var results []kyvernov1.PolicyInterface
 	for _, policy := range policies {
+		// exlude background-only policies
+		if filterBackgroundOnlyPolicies && policy.IsBackGroundOnlyPolicy() {
+			continue
+		}
 		if failurePolicy == "fail" {
 			if policy.GetSpec().GetFailurePolicy() == kyvernov1.Fail {
 				results = append(results, policy)

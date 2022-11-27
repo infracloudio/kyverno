@@ -122,6 +122,15 @@ func checkValidationFailureAction(spec *kyvernov1.Spec) []string {
 	return nil
 }
 
+func validatePolicyBackgroundMode(policy kyvernov1.PolicyInterface) error {
+	validate := policy.GetSpec().ValidationFailureAction
+	background := policy.GetSpec().BackgroundProcessingEnabled()
+	if !background && validate == "" {
+		return fmt.Errorf("%s", "When background is set tot false ValidationFailureAction must be set to either Audit or Enforce")
+	}
+	return nil
+}
+
 // Validate checks the policy and rules declarations for required configurations
 func Validate(policy kyvernov1.PolicyInterface, client dclient.Interface, mock bool, openApiManager openapi.Manager) ([]string, error) {
 	var warnings []string
@@ -137,7 +146,12 @@ func Validate(policy kyvernov1.PolicyInterface, client dclient.Interface, mock b
 	var errs field.ErrorList
 	specPath := field.NewPath("spec")
 
-	err := ValidateVariables(policy, background)
+	err := validatePolicyBackgroundMode(policy)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ValidateVariables(policy, background)
 	if err != nil {
 		return warnings, err
 	}

@@ -2279,3 +2279,88 @@ func Test_Any_wildcard_policy(t *testing.T) {
 	_, err = Validate(policy, nil, true, openApiManager)
 	assert.Assert(t, err != nil)
 }
+
+func Test_Validate_BackgroundOnlyMode_Policy(t *testing.T) {
+	invalidBackgroundModePolicy := `{
+		"apiVersion": "kyverno.io/v1",
+		"kind": "ClusterPolicy",
+		"metadata": {
+		   "name": "check-label-app"
+		},
+		"spec": {
+		   "background": false,
+		   "validationFailureAction": "",
+		   "rules": [
+			  {
+				 "name": "check-label-app",
+				 "match": {
+					"resources": {
+					   "kinds": [
+						  "Pod"
+					   ]
+					}
+				 },
+				 "validate": {
+					"message": "The label 'app' is required.",
+					"pattern": {
+						"metadata": {
+							"labels": {
+								"app": "?*"
+							}
+						}
+					}
+				}
+			  }
+		   ]
+		}
+	 }
+	`
+	var checkLabelsClusterPolicy *kyverno.ClusterPolicy
+	err := json.Unmarshal([]byte(invalidBackgroundModePolicy), &checkLabelsClusterPolicy)
+	assert.NilError(t, err)
+
+	tests := []struct {
+		name                    string
+		background              bool
+		validationFailureAction kyverno.ValidationFailureAction
+		errMessage              string
+	}{
+		{
+			name:                    "Test valid background mode",
+			background:              true,
+			validationFailureAction: "Audit",
+		},
+		{
+			name:                    "Test valid background-only mode",
+			background:              true,
+			validationFailureAction: "",
+		},
+
+		{
+			name:                    "Test valid non background mode",
+			background:              false,
+			validationFailureAction: "Audit",
+		},
+		{
+			name:                    "Test invalid non background mode",
+			background:              false,
+			validationFailureAction: "",
+			errMessage:              "Invalid policy. When background is set tot false ValidationFailureAction must be set to either Audit or Enforce",
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var errMessage string
+			checkLabelsClusterPolicy.Spec.Background = &tt.background
+			checkLabelsClusterPolicy.Spec.ValidationFailureAction = tt.validationFailureAction
+			err := validatePolicyBackgroundMode(checkLabelsClusterPolicy)
+			if err != nil {
+				errMessage = err.Error()
+			}
+			if errMessage != tt.errMessage {
+				t.Errorf("\nTestcase [%v] failed:\nExpected Error:  %v\nGot Error:  %v", i+1, tt.errMessage, errMessage)
+			}
+		})
+	}
+}

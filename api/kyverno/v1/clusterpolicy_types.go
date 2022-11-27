@@ -125,6 +125,11 @@ func (p *ClusterPolicy) CreateDeepCopy() PolicyInterface {
 	return p.DeepCopy()
 }
 
+// BackgroundProcessingEnabled checks if policy is background-only mode
+func (p *ClusterPolicy) IsBackGroundOnlyPolicy() bool {
+	return p.Spec.BackgroundProcessingEnabled() && p.Spec.ValidationFailureAction == ""
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ClusterPolicyList is a list of ClusterPolicy instances.
