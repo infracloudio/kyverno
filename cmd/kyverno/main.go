@@ -34,6 +34,7 @@ import (
 	resourcereportcontroller "github.com/kyverno/kyverno/pkg/controllers/report/resource"
 	webhookcontroller "github.com/kyverno/kyverno/pkg/controllers/webhook"
 	"github.com/kyverno/kyverno/pkg/cosign"
+	"github.com/kyverno/kyverno/pkg/engine/context/resolvers"
 	event "github.com/kyverno/kyverno/pkg/event"
 	"github.com/kyverno/kyverno/pkg/leaderelection"
 	"github.com/kyverno/kyverno/pkg/logging"
@@ -471,6 +472,13 @@ func main() {
 	kubeInformer := kubeinformers.NewSharedInformerFactory(kubeClient, resyncPeriod)
 	kubeKyvernoInformer := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, resyncPeriod, kubeinformers.WithNamespace(config.KyvernoNamespace()))
 	kyvernoInformer := kyvernoinformer.NewSharedInformerFactory(kyvernoClient, resyncPeriod)
+	kubeResourceInformer, err := resolvers.ResourceInformer(kubeClient, resyncPeriod)
+	if err != nil {
+		// only logging is enough as kubeResourceInformer will be nil. hence factory and lister
+		// won't be created.
+		logger.Error(err, "failed to initialize resource informer")
+	}
+	configMapLister := resolvers.ConfigMapLister(kubeResourceInformer)
 	configuration, err := config.NewConfiguration(kubeClient)
 	if err != nil {
 		logger.Error(err, "failed to initialize configuration")
@@ -522,9 +530,16 @@ func main() {
 		openApiManager,
 	)
 	// start informers and wait for cache sync
-	if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer) {
-		logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
-		os.Exit(1)
+	if kubeResourceInformer != nil {
+		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer, kubeResourceInformer) {
+			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
+			os.Exit(1)
+		}
+	} else {
+		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer) {
+			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
+			os.Exit(1)
+		}
 	}
 	// bootstrap non leader controllers
 	if nonLeaderBootstrap != nil {
@@ -625,12 +640,21 @@ func main() {
 		dClient,
 		openApiManager,
 	)
+	informerCacheResolvers, err := resolvers.ResolverChain(kubeClient, configMapLister)
+	if err != nil {
+		// we need to throw error here because if we don't get a resolver chain
+		// either with kubeClient or configMapLister, while getting config map
+		// from Kubernetes, we will get a panic error
+		logger.Error(err, "failed to construct resolver chain")
+		os.Exit(1)
+	}
 	resourceHandlers := webhooksresource.NewHandlers(
 		dClient,
 		kyvernoClient,
 		configuration,
 		metricsConfig,
 		policyCache,
+		informerCacheResolvers,
 		kubeInformer.Core().V1().Namespaces().Lister(),
 		kubeInformer.Rbac().V1().RoleBindings().Lister(),
 		kubeInformer.Rbac().V1().ClusterRoleBindings().Lister(),
@@ -663,9 +687,16 @@ func main() {
 	)
 	// start informers and wait for cache sync
 	// we need to call start again because we potentially registered new informers
-	if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer) {
-		logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
-		os.Exit(1)
+	if kubeResourceInformer != nil {
+		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer, kubeResourceInformer) {
+			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
+			os.Exit(1)
+		}
+	} else {
+		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer) {
+			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
+			os.Exit(1)
+		}
 	}
 	// start webhooks server
 	server.Run(signalCtx.Done())

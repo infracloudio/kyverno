@@ -5,6 +5,7 @@ import (
 	kyvernov1beta1 "github.com/kyverno/kyverno/api/kyverno/v1beta1"
 	"github.com/kyverno/kyverno/pkg/clients/dclient"
 	"github.com/kyverno/kyverno/pkg/engine/context"
+	"github.com/kyverno/kyverno/pkg/engine/context/resolvers"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -41,18 +42,22 @@ type PolicyContext struct {
 
 	// AdmissionOperation represents if the caller is from the webhook server
 	AdmissionOperation bool
+
+	// InformerCacheResolvers - used to get resources from informer cache
+	InformerCacheResolvers resolvers.ConfigmapResolver
 }
 
 func (pc *PolicyContext) Copy() *PolicyContext {
 	return &PolicyContext{
-		Policy:              pc.Policy,
-		NewResource:         pc.NewResource,
-		OldResource:         pc.OldResource,
-		AdmissionInfo:       pc.AdmissionInfo,
-		Client:              pc.Client,
-		ExcludeGroupRole:    pc.ExcludeGroupRole,
-		ExcludeResourceFunc: pc.ExcludeResourceFunc,
-		JSONContext:         pc.JSONContext,
-		NamespaceLabels:     pc.NamespaceLabels,
+		Policy:                 pc.Policy,
+		NewResource:            pc.NewResource,
+		OldResource:            pc.OldResource,
+		AdmissionInfo:          pc.AdmissionInfo,
+		Client:                 pc.Client,
+		ExcludeGroupRole:       pc.ExcludeGroupRole,
+		ExcludeResourceFunc:    pc.ExcludeResourceFunc,
+		JSONContext:            pc.JSONContext,
+		NamespaceLabels:        pc.NamespaceLabels,
+		InformerCacheResolvers: pc.InformerCacheResolvers,
 	}
 }

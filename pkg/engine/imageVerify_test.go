@@ -8,11 +8,12 @@ import (
 
 	"github.com/kyverno/kyverno/pkg/logging"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	kubefake "k8s.io/client-go/kubernetes/fake"
 
 	kyverno "github.com/kyverno/kyverno/api/kyverno/v1"
-	client "github.com/kyverno/kyverno/pkg/clients/dclient"
 	"github.com/kyverno/kyverno/pkg/cosign"
 	"github.com/kyverno/kyverno/pkg/engine/context"
+	"github.com/kyverno/kyverno/pkg/engine/context/resolvers"
 	"github.com/kyverno/kyverno/pkg/engine/response"
 	"github.com/kyverno/kyverno/pkg/engine/utils"
 	"gotest.tools/assert"
@@ -416,7 +417,8 @@ func Test_ConfigMapMissingSuccess(t *testing.T) {
 func Test_ConfigMapMissingFailure(t *testing.T) {
 	ghcrImage := strings.Replace(testConfigMapMissingResource, "nginx:latest", "ghcr.io/kyverno/test-verify-image:signed", -1)
 	policyContext := buildContext(t, testConfigMapMissing, ghcrImage, "")
-	policyContext.Client = client.NewEmptyFakeClient()
+	resolver := resolvers.NewClientBasedResolver(kubefake.NewSimpleClientset())
+	policyContext.InformerCacheResolvers = resolver
 	cosign.ClearMock()
 	err, _ := VerifyAndPatchImages(policyContext)
 	assert.Equal(t, len(err.PolicyResponse.Rules), 1)

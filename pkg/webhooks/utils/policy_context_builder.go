@@ -7,6 +7,7 @@ import (
 	"github.com/kyverno/kyverno/pkg/config"
 	"github.com/kyverno/kyverno/pkg/engine"
 	enginectx "github.com/kyverno/kyverno/pkg/engine/context"
+	"github.com/kyverno/kyverno/pkg/engine/context/resolvers"
 	"github.com/kyverno/kyverno/pkg/userinfo"
 	"github.com/kyverno/kyverno/pkg/utils"
 	"github.com/pkg/errors"
@@ -33,10 +34,11 @@ func newVariablesContext(request *admissionv1.AdmissionRequest, userRequestInfo 
 }
 
 type policyContextBuilder struct {
-	configuration config.Configuration
-	client        dclient.Interface
-	rbLister      rbacv1listers.RoleBindingLister
-	crbLister     rbacv1listers.ClusterRoleBindingLister
+	configuration          config.Configuration
+	client                 dclient.Interface
+	rbLister               rbacv1listers.RoleBindingLister
+	crbLister              rbacv1listers.ClusterRoleBindingLister
+	informerCacheResolvers resolvers.ConfigmapResolver
 }
 
 func NewPolicyContextBuilder(
@@ -44,12 +46,14 @@ func NewPolicyContextBuilder(
 	client dclient.Interface,
 	rbLister rbacv1listers.RoleBindingLister,
 	crbLister rbacv1listers.ClusterRoleBindingLister,
+	informerCacheResolvers resolvers.ConfigmapResolver,
 ) PolicyContextBuilder {
 	return &policyContextBuilder{
-		configuration: configuration,
-		client:        client,
-		rbLister:      rbLister,
-		crbLister:     crbLister,
+		configuration:          configuration,
+		client:                 client,
+		rbLister:               rbLister,
+		crbLister:              crbLister,
+		informerCacheResolvers: informerCacheResolvers,
 	}
 }
 
@@ -75,14 +79,15 @@ func (b *policyContextBuilder) Build(request *admissionv1.AdmissionRequest, poli
 		return nil, errors.Wrap(err, "failed to add image information to the policy rule context")
 	}
 	policyContext := &engine.PolicyContext{
-		NewResource:         newResource,
-		OldResource:         oldResource,
-		AdmissionInfo:       userRequestInfo,
-		ExcludeGroupRole:    b.configuration.GetExcludeGroupRole(),
-		ExcludeResourceFunc: b.configuration.ToFilter,
-		JSONContext:         ctx,
-		Client:              b.client,
-		AdmissionOperation:  true,
+		NewResource:            newResource,
+		OldResource:            oldResource,
+		AdmissionInfo:          userRequestInfo,
+		ExcludeGroupRole:       b.configuration.GetExcludeGroupRole(),
+		ExcludeResourceFunc:    b.configuration.ToFilter,
+		JSONContext:            ctx,
+		Client:                 b.client,
+		AdmissionOperation:     true,
+		InformerCacheResolvers: b.informerCacheResolvers,
 	}
 	return policyContext, nil
 }
