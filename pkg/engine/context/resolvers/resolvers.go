@@ -49,7 +49,6 @@ func NewResolverChain(resolvers ...ConfigmapResolver) (ConfigmapResolver, error)
 	for _, resolver := range resolvers {
 		if resolver == nil {
 			return nil, errors.New("at least one resolver is nil")
-
 		}
 	}
 	return resolverChain(resolvers), nil
