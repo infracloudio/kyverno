@@ -26,7 +26,7 @@ func createConfigMaps(ctx context.Context, kubeClient *kubefake.Clientset, confi
 }
 
 func initialiseInformer(kubeClient *kubefake.Clientset) kubeinformers.SharedInformerFactory {
-	selector, err := selectorForCache()
+	selector, err := GetCacheSelector()
 	if err != nil {
 		return nil
 	}

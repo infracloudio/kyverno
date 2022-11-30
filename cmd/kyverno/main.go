@@ -472,13 +472,26 @@ func main() {
 	kubeInformer := kubeinformers.NewSharedInformerFactory(kubeClient, resyncPeriod)
 	kubeKyvernoInformer := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, resyncPeriod, kubeinformers.WithNamespace(config.KyvernoNamespace()))
 	kyvernoInformer := kyvernoinformer.NewSharedInformerFactory(kyvernoClient, resyncPeriod)
-	kubeResourceInformer, err := resolvers.ResourceInformer(kubeClient, resyncPeriod)
+	cacheInformer, err := resolvers.GetCacheInformerFactory(kubeClient, resyncPeriod)
 	if err != nil {
-		// only logging is enough as kubeResourceInformer will be nil. hence factory and lister
-		// won't be created.
-		logger.Error(err, "failed to initialize resource informer")
+		logger.Error(err, "failed to create cache informer factory")
+		os.Exit(1)
 	}
-	configMapLister := resolvers.ConfigMapLister(kubeResourceInformer)
+	informerBasedResolver, err := resolvers.NewInformerBasedResolver(cacheInformer.Core().V1().ConfigMaps().Lister())
+	if err != nil {
+		logger.Error(err, "failed to create informer based resolver")
+		os.Exit(1)
+	}
+	clientBasedResolver, err := resolvers.NewClientBasedResolver(kubeClient)
+	if err != nil {
+		logger.Error(err, "failed to create client based resolver")
+		os.Exit(1)
+	}
+	configMapResolver, err := resolvers.NewResolverChain(informerBasedResolver, clientBasedResolver)
+	if err != nil {
+		logger.Error(err, "failed to create config map resolver")
+		os.Exit(1)
+	}
 	configuration, err := config.NewConfiguration(kubeClient)
 	if err != nil {
 		logger.Error(err, "failed to initialize configuration")
@@ -530,16 +543,9 @@ func main() {
 		openApiManager,
 	)
 	// start informers and wait for cache sync
-	if kubeResourceInformer != nil {
-		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer, kubeResourceInformer) {
-			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
-			os.Exit(1)
-		}
-	} else {
-		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer) {
-			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
-			os.Exit(1)
-		}
+	if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer, cacheInformer) {
+		logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
+		os.Exit(1)
 	}
 	// bootstrap non leader controllers
 	if nonLeaderBootstrap != nil {
@@ -640,7 +646,6 @@ func main() {
 		dClient,
 		openApiManager,
 	)
-	informerCacheResolvers, err := resolvers.ResolverChain(kubeClient, configMapLister)
 	if err != nil {
 		// we need to throw error here because if we don't get a resolver chain
 		// either with kubeClient or configMapLister, while getting config map
@@ -654,7 +659,7 @@ func main() {
 		configuration,
 		metricsConfig,
 		policyCache,
-		informerCacheResolvers,
+		configMapResolver,
 		kubeInformer.Core().V1().Namespaces().Lister(),
 		kubeInformer.Rbac().V1().RoleBindings().Lister(),
 		kubeInformer.Rbac().V1().ClusterRoleBindings().Lister(),
@@ -687,16 +692,9 @@ func main() {
 	)
 	// start informers and wait for cache sync
 	// we need to call start again because we potentially registered new informers
-	if kubeResourceInformer != nil {
-		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer, kubeResourceInformer) {
-			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
-			os.Exit(1)
-		}
-	} else {
-		if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer) {
-			logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
-			os.Exit(1)
-		}
+	if !internal.StartInformersAndWaitForCacheSync(signalCtx, kyvernoInformer, kubeInformer, kubeKyvernoInformer, cacheInformer) {
+		logger.Error(errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
+		os.Exit(1)
 	}
 	// start webhooks server
 	server.Run(signalCtx.Done())
