@@ -21,6 +21,7 @@ import (
 	enginutils "github.com/kyverno/kyverno/pkg/engine/utils"
 	"github.com/kyverno/kyverno/pkg/event"
 	"github.com/kyverno/kyverno/pkg/metrics"
+	policyUtils "github.com/kyverno/kyverno/pkg/policy"
 	webhookgenerate "github.com/kyverno/kyverno/pkg/webhooks/updaterequest"
 	webhookutils "github.com/kyverno/kyverno/pkg/webhooks/utils"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -188,13 +189,18 @@ func (h *generationHandler) handleUpdateGenerateTargetResource(request *admissio
 		h.log.Error(err, "failed to convert object resource to unstructured format")
 		return
 	}
-	policyKind := kyvernov1beta1.PolicyKindCluster
-	policyName := resLabels["policy.kyverno.io/policy-name"]
-
-	if resLabels["policy.kyverno.io/policy-kind"] == kyvernov1beta1.PolicyKindNamespace {
-		policyKind = kyvernov1beta1.PolicyKindNamespace
+	urName := resLabels["policy.kyverno.io/gr-name"]
+	ur, err := h.urLister.Get(urName)
+	if err != nil {
+		h.log.Error(err, "failed to get update request", "name", urName)
+		return
 	}
 
+	policyKind, policyName, isNamespaced := policyUtils.ParseNamespacedPolicy(ur.Spec.Policy)
+	if !isNamespaced {
+		policyKind = kyvernov1beta1.PolicyKindCluster
+	}
+	
 	targetSourceName := newRes.GetName()
 	targetSourceKind := newRes.GetKind()
 	var policy kyvernov1.PolicyInterface
