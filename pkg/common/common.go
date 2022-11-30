@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-logr/logr"
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
-	kyvernov1beta1 "github.com/kyverno/kyverno/api/kyverno/v1beta1"
 	"github.com/kyverno/kyverno/pkg/client/clientset/versioned"
 	kyvernov1beta1listers "github.com/kyverno/kyverno/pkg/client/listers/kyverno/v1beta1"
 	"github.com/kyverno/kyverno/pkg/clients/dclient"
@@ -137,7 +136,7 @@ func removePolicyFromLabels(pName string, labels map[string]string) (bool, map[s
 		if strings.Contains(policyNames, pName) {
 			desiredLabels := make(map[string]string, len(labels)-1)
 			for k, v := range labels {
-				if k != "generate.kyverno.io/clone-policy-name" && k != kyvernov1beta1.URGenerateClonePolicyKindLabel {
+				if k != "generate.kyverno.io/clone-policy-name" {
 					desiredLabels[k] = v
 				}
 			}

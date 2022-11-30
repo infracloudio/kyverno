@@ -364,6 +364,9 @@ func Test_handleUpdateGenerateTargetResource(t *testing.T) {
 					Name:      "ur-valid",
 					Namespace: config.KyvernoNamespace(),
 				},
+				Spec: kyvernov1beta1.UpdateRequestSpec{
+					Policy: "poltest/pol-sync-clone",
+				},
 				Status: kyvernov1beta1.UpdateRequestStatus{
 					State: kyvernov1beta1.Completed,
 				},
@@ -386,7 +389,6 @@ func Test_handleUpdateGenerateTargetResource(t *testing.T) {
 					  "kyverno.io/generated-by-name":"cm-2",
 					  "kyverno.io/generated-by-namespace":"poltest",
 					  "policy.kyverno.io/gr-name":"ur-valid",
-					  "policy.kyverno.io/policy-kind":"Namespace",
 					  "policy.kyverno.io/policy-name":"pol-sync-clone",
 					  "policy.kyverno.io/synchronize":"enable"
 				   },
@@ -466,6 +468,9 @@ func Test_handleUpdateGenerateTargetResource(t *testing.T) {
 					Name:      "ur-valid",
 					Namespace: config.KyvernoNamespace(),
 				},
+				Spec: kyvernov1beta1.UpdateRequestSpec{
+					Policy: "pol-sync-clone",
+				},
 				Status: kyvernov1beta1.UpdateRequestStatus{
 					State: kyvernov1beta1.Completed,
 				},
@@ -488,7 +493,6 @@ func Test_handleUpdateGenerateTargetResource(t *testing.T) {
 					  "kyverno.io/generated-by-name":"cm-2",
 					  "kyverno.io/generated-by-namespace":"poltest",
 					  "policy.kyverno.io/gr-name":"ur-valid",
-					  "policy.kyverno.io/policy-kind":"Cluster",
 					  "policy.kyverno.io/policy-name":"pol-sync-clone",
 					  "policy.kyverno.io/synchronize":"enable"
 				   },

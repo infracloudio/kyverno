@@ -195,10 +195,10 @@ func (h *generationHandler) handleUpdateGenerateTargetResource(request *admissio
 		h.log.Error(err, "failed to get update request", "name", urName)
 		return
 	}
-
-	policyKind, policyName, isNamespaced := policyUtils.ParseNamespacedPolicy(ur.Spec.Policy)
-	if !isNamespaced {
-		policyKind = kyvernov1beta1.PolicyKindCluster
+	policyKind := kyvernov1beta1.PolicyKindCluster
+	_, policyName, isNamespaced := policyUtils.ParseNamespacedPolicy(ur.Spec.Policy)
+	if isNamespaced {
+		policyKind = kyvernov1beta1.PolicyKindNamespace
 	}
 	
 	targetSourceName := newRes.GetName()
