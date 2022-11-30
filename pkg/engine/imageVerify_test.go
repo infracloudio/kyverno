@@ -417,12 +417,13 @@ func Test_ConfigMapMissingSuccess(t *testing.T) {
 func Test_ConfigMapMissingFailure(t *testing.T) {
 	ghcrImage := strings.Replace(testConfigMapMissingResource, "nginx:latest", "ghcr.io/kyverno/test-verify-image:signed", -1)
 	policyContext := buildContext(t, testConfigMapMissing, ghcrImage, "")
-	resolver := resolvers.NewClientBasedResolver(kubefake.NewSimpleClientset())
+	resolver, err := resolvers.NewClientBasedResolver(kubefake.NewSimpleClientset())
+	assert.NilError(t, err)
 	policyContext.InformerCacheResolvers = resolver
 	cosign.ClearMock()
-	err, _ := VerifyAndPatchImages(policyContext)
-	assert.Equal(t, len(err.PolicyResponse.Rules), 1)
-	assert.Equal(t, err.PolicyResponse.Rules[0].Status, response.RuleStatusError, err.PolicyResponse.Rules[0].Message)
+	rspn, _ := VerifyAndPatchImages(policyContext)
+	assert.Equal(t, len(rspn.PolicyResponse.Rules), 1)
+	assert.Equal(t, rspn.PolicyResponse.Rules[0].Status, response.RuleStatusError, rspn.PolicyResponse.Rules[0].Message)
 }
 
 func Test_SignatureGoodSigned(t *testing.T) {

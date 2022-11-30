@@ -45,16 +45,19 @@ func ConfigMapLister(kubeResourceInformer kubeinformers.SharedInformerFactory) c
 	return kubeResourceInformer.Core().V1().ConfigMaps().Lister()
 }
 
-func ResolverChain(kubeClient kubernetes.Interface, configMapLister corev1listers.ConfigMapLister) (ConfigmapResolver, error) {
-	chain := resolverChain{}
-	if kubeClient != nil {
-		chain = append(chain, NewClientBasedResolver(kubeClient))
+func ResolverChain(client kubernetes.Interface, lister corev1listers.ConfigMapLister) (ConfigmapResolver, error) {
+	var resolvers []ConfigmapResolver
+	if lister != nil {
+		resolver, err := NewInformerBasedResolver(lister)
+		if err != nil {
+			resolvers = append(resolvers, resolver)
+		}
 	}
-	if configMapLister != nil {
-		chain = append(chain, NewInformerBasedResolver(configMapLister))
+	if client != nil {
+		resolver, err := NewClientBasedResolver(client)
+		if err != nil {
+			resolvers = append(resolvers, resolver)
+		}
 	}
-	if len(chain) == 0 {
-		return nil, errors.New("resolver chain needs either kubeclient or lister")
-	}
-	return NewResolverChain(chain), nil
+	return NewResolverChain(resolvers...)
 }
