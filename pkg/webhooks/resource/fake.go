@@ -28,15 +28,9 @@ func NewFakeHandlers(ctx context.Context, policyCache policycache.Cache) webhook
 
 	kyvernoclient := fakekyvernov1.NewSimpleClientset()
 	kyvernoInformers := kyvernoinformers.NewSharedInformerFactory(kyvernoclient, 0)
+	configMapResolver, _ := resolvers.NewClientBasedResolver(client)
 	kyvernoInformers.Start(ctx.Done())
 
-	var cacheResolvers resolvers.ConfigmapResolver
-	resourceInformers, err := resolvers.ResourceInformer(client, 0)
-	if err == nil {
-		resourceInformers.Start(ctx.Done())
-		configMapLister := resolvers.ConfigMapLister(resourceInformers)
-		cacheResolvers, _ = resolvers.ResolverChain(client, configMapLister)
-	}
 	dclient := dclient.NewEmptyFakeClient()
 	configuration := config.NewDefaultConfiguration()
 	rbLister := informers.Rbac().V1().RoleBindings().Lister()
@@ -54,7 +48,7 @@ func NewFakeHandlers(ctx context.Context, policyCache policycache.Cache) webhook
 		urGenerator:    updaterequest.NewFake(),
 		eventGen:       event.NewFake(),
 		openApiManager: openapi.NewFake(),
-		pcBuilder:      webhookutils.NewPolicyContextBuilder(configuration, dclient, rbLister, crbLister, cacheResolvers),
+		pcBuilder:      webhookutils.NewPolicyContextBuilder(configuration, dclient, rbLister, crbLister, configMapResolver),
 		urUpdater:      webhookutils.NewUpdateRequestUpdater(kyvernoclient, urLister),
 	}
 }
